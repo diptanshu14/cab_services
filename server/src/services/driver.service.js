@@ -20,3 +20,18 @@ export const register = async (
 
     return { token, driver }
 }
+
+
+export const login = async (email, password) => {
+    const driver = await Driver.findOne({ email }).select("+password")
+    if (!driver) return { token: null, driver: null }
+
+    const isPasswordValid = await driver.comparePassword(password)
+    if (!isPasswordValid) return { token: null, driver: null }
+
+    const token = jwt.sign({ _id: driver._id }, process.env.JWT_SECRET, { 
+        expiresIn: '24h'
+    })
+
+    return { token, driver }
+}
